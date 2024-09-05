@@ -17,11 +17,11 @@ const Footer = () => {
         <div className='flex flex-col justify-start items-start'>
           <div className='flex flex-col justify-start items-start '>          <h2 className='  text-4xl md:text-3xl font-bold text-center bg-clip-text text-transparent bg-gradient-to-b from-neutral-50 to-neutral-400 bg-opacity-50'>Ressources</h2>
 
-            <a className='text-white '>Accueil</a>
-            <a className='text-white '>A propos</a>
-            <a className='text-white '>Types de Quiz</a>
-            <a className='text-white '>Contacts</a>
-            <a className='text-white '>Connexion</a>
+            <a className='text-white ' href='#' >Accueil</a>
+            <a className='text-white ' href='#' >A propos</a>
+            <a className='text-white ' href='#' >Types de Quiz</a>
+            <a className='text-white ' href='#' >Contacts</a>
+            <a className='text-white ' href='#' >Connexion</a>
           </div>
         </div>
         <div className='flex flex-col justify-start items-start'>

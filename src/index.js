@@ -10,6 +10,10 @@ import About from './Components/About';
 import DashBoard from './Screens/DashBoard/DashBoard';
 import Contact from './Screens/Contact/contact';
 import MessageAdmin from './Screens/MessageAdmin';
+import Admins from './Screens/Admins/Admins';
+import Users from './Screens/Users/Users';
+import Categorie from './Screens/Categorie';
+import Quiz from './Screens/Quiz/Quiz';
 
 const router = createBrowserRouter ([
   { path: '/', element: <App></App>},
@@ -19,7 +23,11 @@ const router = createBrowserRouter ([
   { path: '/about', element: <About></About>},
   { path: '/dashboard', element: <DashBoard></DashBoard>},
   { path: '/contact', element: <Contact></Contact>},
-  { path: '/messageAdmin', element: <MessageAdmin></MessageAdmin>}
+  { path: '/messageAdmin', element: <MessageAdmin></MessageAdmin>},
+  { path: '/admins', element: <Admins></Admins>},
+  { path: '/users', element: <Users></Users>},
+  { path: '/categories', element: <Categorie></Categorie>},
+  { path: '/quiz', element: <Quiz></Quiz>}
 ])
 
 const root = ReactDOM.createRoot(document.getElementById('root'));

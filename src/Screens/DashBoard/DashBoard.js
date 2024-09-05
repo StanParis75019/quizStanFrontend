@@ -5,6 +5,7 @@ import { SiAlwaysdata } from "react-icons/si";
 import axios from 'axios';
 import {FadeLoader} from "react-spinners" 
 import { ClapSpinner } from 'react-spinners-kit';
+import {toast, Toaster} from 'react-hot-toast';
 
 const DashBoard = () => {
   const [admins, setadmins] = useState([])
@@ -17,19 +18,20 @@ const DashBoard = () => {
   const getadmins = async () => {
     setisloading (true)
     try {
-      const reponse = await axios.get('http://localhost:3001/auth/getalladmin');
+      const reponse = await axios.get('http://localhost:3001/auth/getalladmins');
       setadmins(reponse.data)
       setisloading (false)
     } catch (error) {
       setisloading (false)
-      
+      toast.error('Données non reçus')
+      console.log(error)
     }
   }
   const getquiz = async () => {
     setisloading(true)
     try {
       
-      const reponse = await axios.get('http://localhost:3001/auth/getallquiz');
+      const reponse = await axios.get('http://localhost:3001/quiz/getallquiz');
       setquiz(reponse.data)
       setisloading(false)
     } catch (error) {
@@ -51,7 +53,7 @@ const DashBoard = () => {
   const getusers = async () => {
     setisloading (true)
     try {
-      const reponse = await axios.get('http://localhost:3001/auth/getallusers');
+      const reponse = await axios.get('http://localhost:3001/user/getalluser');
       setusers(reponse.data)
       setisloading (false)
     } catch (error) {
@@ -68,7 +70,8 @@ const DashBoard = () => {
   return (
     <div className='flex flex-col min-h-screen bg-gray-100 '>
         <div className='flex flex-row h-screen'>
-            <NavBarAdmin></NavBarAdmin> 
+            <NavBarAdmin></NavBarAdmin>
+            <Toaster></Toaster> 
             <div className='flex-1 p-6 overflow-scroll '>
               <div className='grid grid-cols-3 gap-6'>
                 <div className='bg-white p-6 rounded-lg shadow-md'>

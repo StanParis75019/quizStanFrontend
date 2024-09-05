@@ -18,12 +18,13 @@ const Register = () => {
     setLoading(true)
     setTimeout(async () => {
       try {
-        const {data} = await axios.post("http://localhost:3001/auth/register", {
+        const {data} = await axios.post("http://localhost:3001/user/register", {
           email,
           password,
           username: userName,
           firstName,
-          lastName
+          lastName,
+          
         })
         toast.success('Inscription réussie!',{
           duration: 3000,

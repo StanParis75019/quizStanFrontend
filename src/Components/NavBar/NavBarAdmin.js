@@ -37,13 +37,25 @@ const NavBarAdmin = () => {
             </div>
             <div className='flex flex-row items-center text-gray-700 space-x-2 cursor-pointer'>
                 <MdOutlineQuiz></MdOutlineQuiz>
-                <span>OverView</span>
+                <Link to = '/admins'>
+                <span>Admins</span>                
+                </Link>
                 
 
             </div>
             <div className='flex flex-row items-center text-gray-700 space-x-2 cursor-pointer'>
                 <MdOutlineQuiz></MdOutlineQuiz>
-                <span>OverView</span>
+                <Link to = '/users'>
+                <span>Users</span>                                
+                </Link>
+                
+
+            </div>
+            <div className='flex flex-row items-center text-gray-700 space-x-2 cursor-pointer'>
+                <MdOutlineQuiz></MdOutlineQuiz>
+                <Link to = '/quiz'>
+                <span>Quizs</span>                                
+                </Link>
                 
 
             </div>
@@ -53,6 +65,7 @@ const NavBarAdmin = () => {
                 
 
             </div>
+
 
            </div>
         </div>

@@ -6,6 +6,7 @@ import Bond from '../../Components/Bond/Bond'
 import axios from 'axios'
 import {RotateSpinner} from 'react-spinners-kit'
 import { Toaster, toast } from 'react-hot-toast' 
+import NewNav from '../../Components/newNav'
 
 const Contact = () => {
     const [email, setemail] = useState()
@@ -50,7 +51,7 @@ const Contact = () => {
 
   return (
     <div>
-        <Navbar></Navbar>
+        <NewNav></NewNav>
         <Toaster></Toaster>
         <Bond contenu= "Contactez-nous" ></Bond>
         {/* <Header></Header> */}
