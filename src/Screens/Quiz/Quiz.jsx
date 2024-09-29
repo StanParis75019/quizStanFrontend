@@ -1,224 +1,243 @@
-import React, { useEffect, useState } from 'react'
-import NavBarAdmin from '../../Components/NavBar/NavBarAdmin'
-import {toast, Toaster } from 'react-hot-toast'
-import { Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Paper, Dialog, DialogTitle, DialogContent, DialogContentText } from '@mui/material';
+// ManageQuizzesPage.js
+import React, { useState, useEffect } from 'react';
 import axios from 'axios';
-import { RotateSpinner } from 'react-spinners-kit';
-import { CgTrash } from 'react-icons/cg';
-import { MdUpdate } from 'react-icons/md';
+import { Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Paper, IconButton, Dialog, DialogActions, DialogContent, DialogTitle, Button, TextField, Select, MenuItem, InputLabel, FormControl } from '@mui/material';
+import { FaTrashAlt, FaEdit, FaPlus, FaSpinner } from 'react-icons/fa';
+import NavBarAdmin from '../../Components/NavBar/NavBarAdmin';
+import { BASE_URL } from '../../Components/Constant';
 
+const ManageQuizzesPage = () => {
+  const [quizzes, setQuizzes] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [selectedQuiz, setSelectedQuiz] = useState(null);
+  const [isAddDialogOpen, setIsAddDialogOpen] = useState(false);
+  const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
+  const [quizDetails, setQuizDetails] = useState({
+    question: '',
+    response: '',
+    category: '',
+  });
 
-
-
-const Quiz = () => {
-    const [isloading, setisloading] = useState(false)
-    const [quizs, setquizs] = useState([])
-    const [opencreation, setopencreation] = useState(false)
-    const [question, setquestion] = useState()
-    const [reponse, setreponse] = useState()
-    const [categorie, setcategorie] = useState()
-    const [idupdate, setidupdate] = useState()
-    const [handleopenupdate, sethandleopenupdate] = useState(false)
-    const handleclickopenupdate = (item) =>{
-        setidupdate(item.id)
-        setquestion(item.Question)
-        setreponse(item.Reponse)
-        setcategorie(item.Categorie)
-        sethandleopenupdate(true)
-
-
+  // Fetch quizzes from the backend
+  const fetchQuizzes = async () => {
+    try {
+      const response = await axios.get(BASE_URL + 'quizzes');
+      setQuizzes(response.data);
+      setLoading(false);
+    } catch (error) {
+      console.error('Error fetching quizzes:', error);
+      setLoading(false);
     }
-    const handleclickcloseupdate = () =>{
-        sethandleopenupdate(false)
+  };
+
+  useEffect(() => {
+    fetchQuizzes();
+  }, []);
+
+  // Handle change in quiz details
+  const handleQuizDetailsChange = (e) => {
+    setQuizDetails({ ...quizDetails, [e.target.name]: e.target.value });
+  };
+
+  // Handle delete button click
+  const handleDeleteClick = (quiz) => {
+    setSelectedQuiz(quiz);
+    handleDeleteQuiz();
+  };
+
+  // Handle the actual deletion of the quiz
+  const handleDeleteQuiz = async () => {
+    try {
+      await axios.delete(BASE_URL + `quizzes/${selectedQuiz.id}`);
+      // Remove the quiz from the list
+      setQuizzes(quizzes.filter((quiz) => quiz.id !== selectedQuiz.id));
+      setSelectedQuiz(null);
+    } catch (error) {
+      console.error('Error deleting quiz:', error);
     }
+  };
 
-
-
-    const handledelete = async (id) =>{
-       setisloading(true)
-        try {
-            const response = await axios.delete("http://localhost:3001/quiz/delete/" + id)
-            fetchers()
-            toast.success("Votre quiz a été supprimé")
-            setisloading(false)
-        } catch (error) {
-            toast.error("Quiz non supprimé")
-        }
+  // Handle adding new quiz
+  const handleAddQuiz = async () => {
+    try {
+      await axios.post(BASE_URL + 'quizzes', quizDetails);
+      // Refresh quizzes after adding
+      fetchQuizzes();
+      setIsAddDialogOpen(false);
+      setQuizDetails({ question: '', response: '', category: '' });
+    } catch (error) {
+      console.error('Error adding quiz:', error);
     }
+  };
 
-    const update = async () =>{
-        setisloading(true)
-        try {
-            await axios.put("http://localhost:3001/quiz/delete/" + idupdate)
-            fetchers()
-            setisloading(false)
-            handleclickcloseupdate()
-        } catch (error) {
-            
-        }
+  // Handle edit quiz
+  const handleEditQuiz = async () => {
+    try {
+      await axios.put(BASE_URL + `quizzes/${selectedQuiz.id}`, quizDetails);
+      // Refresh quizzes after updating
+      fetchQuizzes();
+      setIsEditDialogOpen(false);
+      setSelectedQuiz(null);
+      setQuizDetails({ question: '', response: '', category: '' });
+    } catch (error) {
+      console.error('Error updating quiz:', error);
     }
+  };
 
-    const handleclosecreation = () => {
-        setopencreation(false)
+  // Open edit dialog
+  const handleEditClick = (quiz) => {
+    setSelectedQuiz(quiz);
+    setQuizDetails({
+      question: quiz.question,
+      response: quiz.response,
+      category: quiz.category,
+    });
+    setIsEditDialogOpen(true);
+  };
 
-    }
-    const handleclickopencreation = () => {
-        setopencreation(true)
-    }
-    const handleclickopenvalidation = async () => {
-    setisloading(true)
-    setTimeout( async () => {
-        try {
-            const response = await axios.post('http://localhost:3001/quiz/create', {Question:question, Reponse:reponse, Categorie:categorie})
-            setisloading(false)
-            fetchers()
-            handleclosecreation()
-        } catch (error) {
-            setisloading(false)
-            console.log(error)
-        }
-    }, 1000);
-    }
-    const fetchers = async () => {
-        setisloading(true)
-        setTimeout(async () => {
-            try {
-                const response = await axios.get("http://localhost:3001/quiz/getallquiz")
-                setquizs(response.data)
-                setisloading(false)
+  return (
+    <div className="ManageQuizzesPage bg-gray-100 min-h-screen">
+      <NavBarAdmin />
+      <div className="ml-72 p-8">
+        <h2 className="text-3xl font-bold mb-8 text-gray-800">Gérer les Quizs</h2>
 
-            } catch (error) {
-                setisloading(false)
-                console.log(error)
-            }
-        }, 2000);
-    }
-    useEffect(() => {
-        fetchers()
-    }, [])
-    return (
-        <div className='flex flex-col min-h-screen bg-gray-100 '>
-            <div className='flex flex-row h-screen'>
-                <NavBarAdmin></NavBarAdmin>
-                <Toaster></Toaster>
-                <div className='flex-1 p-6 overflow-scroll '>
-
-                    <div className='w-full flex flex-col justify-start items-center'>
-                        <div className='w-[80%] bg-white shadow-md shadow-gray-300 flex flex-row justify-between items-center p-4'>
-                            <h1 className='text-start font-bold text-2xl '>
-                                Gestion des Quiz
-                            </h1>
-                            <button onClick={handleclickopencreation} className='text-white bg-black px-3 py-2 font-medium text-center '>Ajouter</button>
-                        </div>
-                        <div className='w-[80%] my-3  '>
-                            {isloading ? (
-                                <div className='w-full flex flex-col justify-center items-center h-[200px] bg-white shadow-md shadow-gray-200'>
-                                    <RotateSpinner color="#000" size={50}></RotateSpinner>
-                                </div>
-                            ) : (
-
-                                <TableContainer component={Paper}>
-                                    <Table>
-                                        <TableHead>
-                                            <TableRow>
-                                                <TableCell>id</TableCell>
-                                                <TableCell align="left">Questions</TableCell>
-                                                <TableCell align="left">Reponses</TableCell>
-                                                <TableCell align="left">Categories</TableCell>
-                                                <TableCell align="left">Action</TableCell>
-                                            </TableRow>
-                                        </TableHead>
-                                        <TableBody>
-                                            {quizs.map(item => {
-                                                return (
-                                                    <TableRow>
-                                                        <TableCell>{item.id}</TableCell>
-                                                        <TableCell align="left">{item.Question}</TableCell>
-                                                        <TableCell align="left">{item.Reponse}</TableCell>
-                                                        <TableCell align="left">{item.Categorie}</TableCell>
-                                                        <TableCell align="left"><CgTrash className='text-red-500 text-2xl ' onClick={() => handledelete(item.id)}></CgTrash>
-                                                        <MdUpdate onClick={()=>handleclickopenupdate(item)} className='text-cyan-500 text-2xl mx-2 '></MdUpdate>
-                                                        </TableCell>
-                                                    </TableRow>
-                                                )
-                                            })}
-                                        </TableBody>
-                                    </Table>
-                                </TableContainer>
-                            )}
-
-
-                        </div>
-                    </div>
-
-                </div>
-                <Dialog open={opencreation} onClose={handleclosecreation}  >
-                    <DialogTitle>
-                        <h1 className='text-start font-bold text-2xl '>Ajouter un quiz </h1>
-                    </DialogTitle>
-                    <DialogContent>
-                        <DialogContentText className='w-[400px] '>
-                            {isloading ? (
-                                <div className="flex flex-col justify-center items-center w-full">
-
-                                    <RotateSpinner size={50} ></RotateSpinner>
-                                </div>
-                            ) : (
-                                <div className='w-full flex flex-col justify-start items-center '>
-                                    <div className="w-full flex flex-col justify-start items-center">
-                                        <label htmlFor="" className="text-start w-full ">Question</label>
-                                        <input value={question} onChange={(e)=>setquestion(e.target.value)} type="text" className="w-full border-2 border-gray-200 py-2 px-2 my-2" />
-                                    </div>
-                                    <div className="w-full flex flex-col justify-start items-center">
-                                        <label htmlFor="" className="text-start w-full ">Reponse</label>
-                                        <input value={reponse} onChange={(e)=>setreponse(e.target.value)} type="text" className="w-full border-2 border-gray-200 py-2 px-2 my-2" />
-                                    </div>
-                                    <div className="w-full flex flex-col justify-start items-center">
-                                        <label htmlFor="" className="text-start w-full ">Categorie</label>
-                                        <input value={categorie} onChange={(e)=>setcategorie(e.target.value)} type="text" className="w-full border-2 border-gray-200 py-2 px-2 my-2" />
-                                    </div>
-                                    <button onClick={handleclickopenvalidation} className="w-full bg-black text-white my-2 text-center py-2">Créer</button>
-                                </div>
-                            )}
-
-                        </DialogContentText>
-                    </DialogContent>
-                </Dialog>
-                <Dialog open={handleopenupdate} onClose={handleclickcloseupdate}  >
-                    <DialogTitle>
-                        <h1 className='text-start font-bold text-2xl '>Ajouter un quiz </h1>
-                    </DialogTitle>
-                    <DialogContent>
-                        <DialogContentText className='w-[400px] '>
-                            {isloading ? (
-                                <div className="flex flex-col justify-center items-center w-full">
-
-                                    <RotateSpinner size={50} ></RotateSpinner>
-                                </div>
-                            ) : (
-                                <div className='w-full flex flex-col justify-start items-center '>
-                                    <div className="w-full flex flex-col justify-start items-center">
-                                        <label htmlFor="" className="text-start w-full ">Question</label>
-                                        <input value={question} onChange={(e)=>setquestion(e.target.value)} type="text" className="w-full border-2 border-gray-200 py-2 px-2 my-2" />
-                                    </div>
-                                    <div className="w-full flex flex-col justify-start items-center">
-                                        <label htmlFor="" className="text-start w-full ">Reponse</label>
-                                        <input value={reponse} onChange={(e)=>setreponse(e.target.value)} type="text" className="w-full border-2 border-gray-200 py-2 px-2 my-2" />
-                                    </div>
-                                    <div className="w-full flex flex-col justify-start items-center">
-                                        <label htmlFor="" className="text-start w-full ">Categorie</label>
-                                        <input value={categorie} onChange={(e)=>setcategorie(e.target.value)} type="text" className="w-full border-2 border-gray-200 py-2 px-2 my-2" />
-                                    </div>
-                                    <button onClick={update} className="w-full bg-black text-white my-2 text-center py-2">Créer</button>
-                                </div>
-                            )}
-
-                        </DialogContentText>
-                    </DialogContent>
-                </Dialog>
-            </div>
+        {/* Add Quiz Button */}
+        <div className="mb-4">
+          <Button
+            variant="contained"
+            color="primary"
+            startIcon={<FaPlus />}
+            onClick={() => setIsAddDialogOpen(true)}
+          >
+            Ajouter un nouveau quiz
+          </Button>
         </div>
-    )
-}
 
-export default Quiz
+        {/* Quizzes Table */}
+        <TableContainer component={Paper}>
+          <Table>
+            <TableHead>
+              <TableRow>
+                <TableCell>Question</TableCell>
+                <TableCell>Réponse</TableCell>
+                <TableCell>Catégorie</TableCell>
+                <TableCell>Actions</TableCell>
+              </TableRow>
+            </TableHead>
+            <TableBody>
+              {loading ? (
+                <TableRow>
+                  <TableCell colSpan={4} align="center">
+                    <FaSpinner className="animate-spin text-4xl text-gray-400" />
+                  </TableCell>
+                </TableRow>
+              ) : (
+                quizzes.map((quiz) => (
+                  <TableRow key={quiz.id}>
+                    <TableCell>{quiz.question}</TableCell>
+                    <TableCell>{quiz.response ? 'Vrai' : 'Faux'}</TableCell>
+                    <TableCell>{quiz.category}</TableCell>
+                    <TableCell>
+                      <IconButton onClick={() => handleEditClick(quiz)}>
+                        <FaEdit />
+                      </IconButton>
+                      <IconButton onClick={() => handleDeleteClick(quiz)}>
+                        <FaTrashAlt />
+                      </IconButton>
+                    </TableCell>
+                  </TableRow>
+                ))
+              )}
+            </TableBody>
+          </Table>
+        </TableContainer>
+
+        {/* Add Quiz Dialog */}
+        <Dialog open={isAddDialogOpen} onClose={() => setIsAddDialogOpen(false)}>
+          <DialogTitle>Ajouter un nouveau quiz</DialogTitle>
+          <DialogContent>
+            <TextField
+              margin="dense"
+              label="Question"
+              fullWidth
+              name="question"
+              value={quizDetails.question}
+              onChange={handleQuizDetailsChange}
+            />
+            <FormControl fullWidth margin="dense">
+              <InputLabel>Réponse</InputLabel>
+              <Select
+                name="response"
+                value={quizDetails.response}
+                onChange={handleQuizDetailsChange}
+              >
+                <MenuItem value="true">Vrai</MenuItem>
+                <MenuItem value="false">Faux</MenuItem>
+              </Select>
+            </FormControl>
+            <TextField
+              margin="dense"
+              label="Catégorie"
+              fullWidth
+              name="category"
+              value={quizDetails.category}
+              onChange={handleQuizDetailsChange}
+            />
+          </DialogContent>
+          <DialogActions>
+            <Button onClick={() => setIsAddDialogOpen(false)} color="primary">
+              Annuler
+            </Button>
+            <Button onClick={handleAddQuiz} color="primary">
+              Ajouter
+            </Button>
+          </DialogActions>
+        </Dialog>
+
+        {/* Edit Quiz Dialog */}
+        <Dialog open={isEditDialogOpen} onClose={() => setIsEditDialogOpen(false)}>
+          <DialogTitle>Modifier le quiz</DialogTitle>
+          <DialogContent>
+            <TextField
+              margin="dense"
+              label="Question"
+              fullWidth
+              name="question"
+              value={quizDetails.question}
+              onChange={handleQuizDetailsChange}
+            />
+            <FormControl fullWidth margin="dense">
+              <InputLabel>Réponse</InputLabel>
+              <Select
+                name="response"
+                value={quizDetails.response}
+                onChange={handleQuizDetailsChange}
+              >
+                <MenuItem value="true">Vrai</MenuItem>
+                <MenuItem value="false">Faux</MenuItem>
+              </Select>
+            </FormControl>
+            <TextField
+              margin="dense"
+              label="Catégorie"
+              fullWidth
+              name="category"
+              value={quizDetails.category}
+              onChange={handleQuizDetailsChange}
+            />
+          </DialogContent>
+          <DialogActions>
+            <Button onClick={() => setIsEditDialogOpen(false)} color="primary">
+              Annuler
+            </Button>
+            <Button onClick={handleEditQuiz} color="primary">
+              Enregistrer
+            </Button>
+          </DialogActions>
+        </Dialog>
+      </div>
+    </div>
+  );
+};
+
+export default ManageQuizzesPage;

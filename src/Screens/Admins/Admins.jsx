@@ -1,319 +1,294 @@
-import React, { useEffect, useState } from 'react'
-import NavBarAdmin from '../../Components/NavBar/NavBarAdmin'
-import { ClapSpinner, RotateSpinner } from 'react-spinners-kit'
-import { CgProfile } from "react-icons/cg";
-import { FaTrashAlt } from "react-icons/fa";
+import React, { useState, useEffect } from 'react';
 import axios from 'axios';
-import {toast, Toaster} from 'react-hot-toast';
-import { Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Paper, Button, Dialog, DialogActions, DialogContent, DialogContentText, DialogTitle } from "@mui/material"
-import { Checkmark } from 'react-checkmark'
+import { Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Paper, IconButton, Dialog, DialogActions, DialogContent, DialogContentText, DialogTitle, Button, TextField, Fab } from '@mui/material';
+import { FaTrashAlt, FaUserPlus, FaSpinner } from 'react-icons/fa';
+import NavBarAdmin from '../../Components/NavBar/NavBarAdmin';
+import { BASE_URL } from '../../Components/Constant';
 
+const ManageAdminsPage = () => {
+  // État pour stocker la liste des administrateurs récupérés du backend
+  const [admins, setAdmins] = useState([]);
 
-const Admins = () => {
-    const [admins, setadmins] = useState([])
-    const [isloading, setisloading] = useState(false)
-    const [open, handleopen] = useState(false)
-    const [openvalidation, handleopenvalidation] = useState(false)
-    const [email, setemail] = useState()
-    const [password, setpassword] = useState()
-    const [idmessage, setid] = useState()
-    const [isok, setisok] = useState()
-    const [opencreation, setopencreation] = useState(false)
-    const [nom, setnom] = useState()
-    const [prenom, setprenom] = useState()
-    const [username, setusername] = useState()
-    const [iscreated, setiscreated] = useState(false)
+  // État pour l'administrateur actuellement sélectionné pour la suppression
+  const [selectedAdmin, setSelectedAdmin] = useState(null);
 
+  // États pour contrôler l'ouverture des boîtes de dialogue
+  const [isConfirmDialogOpen, setIsConfirmDialogOpen] = useState(false); // Dialogue de confirmation de suppression
+  const [isAuthDialogOpen, setIsAuthDialogOpen] = useState(false); // Dialogue d'authentification pour la suppression
+  const [isAddDialogOpen, setIsAddDialogOpen] = useState(false); // Dialogue pour ajouter un nouvel administrateur
 
-    const createadmin = async () =>{
-        setisloading(true)
-        setiscreated(false)
+  // États pour stocker les informations d'authentification
+  const [adminEmail, setAdminEmail] = useState(''); // Email de l'administrateur pour la suppression
+  const [adminPassword, setAdminPassword] = useState(''); // Mot de passe pour la suppression
 
-        setTimeout(async() => {
-            try {
-                const response = await axios.post("http://localhost:3001/auth/register", {
-                    email, password, username, firstName:nom, lastName:prenom
-                })
-                setisloading(false)
-                setiscreated(true)
-                setTimeout(() => {
-                    handleclosecreation()
-                }, 3000);
-                fetchdata()
-            } catch (error) {
-                console.log(error)
-            }
-        }, 3000);
+  // État pour indiquer si les données sont en cours de chargement
+  const [loading, setLoading] = useState(true);
+
+  // État pour stocker les informations du nouvel administrateur lors de l'ajout
+  const [newAdmin, setNewAdmin] = useState({
+    username: '',
+    firstName: '',
+    lastName: '',
+    email: '',
+    password: '',
+    confirmedPassword: ''
+  });
+
+  // Effectue un appel à l'API pour récupérer la liste des administrateurs lors du montage du composant
+  useEffect(() => {
+    const fetchAdmins = async () => {
+      try {
+        const response = await axios.get(BASE_URL + "auth/getalladmins");
+        setAdmins(response.data); // Met à jour l'état avec les administrateurs récupérés
+        setLoading(false); // Arrête l'état de chargement
+      } catch (error) {
+        console.error('Erreur lors de la récupération des administrateurs :', error);
+        setLoading(false);
+      }
+    };
+    fetchAdmins();
+  }, []); // [] indique que l'effet ne s'exécutera qu'une seule fois, au montage du composant
+
+  // Gère le clic sur le bouton de suppression d'un administrateur
+  const handleDeleteClick = (admin) => {
+    setSelectedAdmin(admin); // Stocke l'administrateur sélectionné
+    setIsConfirmDialogOpen(true); // Ouvre la boîte de dialogue de confirmation
+  };
+
+  // Gère la confirmation de suppression, ouvre la boîte de dialogue d'authentification
+  const handleConfirmDelete = () => {
+    setIsConfirmDialogOpen(false); // Ferme la boîte de dialogue de confirmation
+    setIsAuthDialogOpen(true); // Ouvre la boîte de dialogue d'authentification
+  };
+
+  // Gère la suppression réelle de l'administrateur
+  const handleDeleteAdmin = async () => {
+    try {
+      // Envoie une requête pour supprimer l'administrateur avec les informations d'authentification
+      await axios.delete(BASE_URL+`auth/deleteadmin/${selectedAdmin.id}`, {
+        data: {
+          email: adminEmail,
+          password: adminPassword,
+        },
+      });
+      
+      // Met à jour l'état en supprimant l'administrateur de la liste localement
+      setAdmins(admins.filter((admin) => admin.id !== selectedAdmin.id));
+
+      // Réinitialise les champs et ferme les boîtes de dialogue
+      setIsAuthDialogOpen(false);
+      setAdminEmail('');
+      setAdminPassword('');
+      setSelectedAdmin(null);
+    } catch (error) {
+      console.error('Erreur lors de la suppression de l\'administrateur :', error);
     }
+  };
 
-    const handleclickopencreation = () =>{
-        
-        setopencreation(true)
+  // Ouvre la boîte de dialogue pour ajouter un nouvel administrateur
+  const handleAddAdminClick = () => {
+    setIsAddDialogOpen(true);
+  };
 
+  // Gère l'ajout d'un nouvel administrateur
+  const handleAddAdmin = async () => {
+    try {
+      // Vérifie si les mots de passe correspondent
+      if (newAdmin.password !== newAdmin.confirmedPassword) {
+        alert("Les mots de passe ne correspondent pas");
+        return;
+      }
+
+      // Envoie une requête pour ajouter le nouvel administrateur
+      await axios.post(BASE_URL + 'auth/register', newAdmin);
+
+      // Met à jour l'état avec le nouvel administrateur
+      setAdmins([...admins, newAdmin]);
+
+      // Réinitialise les champs et ferme la boîte de dialogue
+      setIsAddDialogOpen(false);
+      setNewAdmin({
+        username: '',
+        firstName: '',
+        lastName: '',
+        email: '',
+        password: '',
+        confirmedPassword: ''
+      });
+    } catch (error) {
+      console.error('Erreur lors de l\'ajout de l\'administrateur :', error);
     }
-    
-    const handleclosecreation = () =>{
-        setopencreation(false)
-    }
+  };
 
-    const authenticate = async () =>{
-        setisloading(true)
-        setTimeout(async () => {
-            try {
-                const response = await axios.post('http://localhost:3001/auth/login', {email, password})
-                const deleter = await axios.delete('http://localhost:3001/auth/deleteadmin/' + idmessage)
-                fetchdata()
-                handleclosevalidation()
-                toast.success('Suppression réussie!',{
-                    duration: 3000,
-                    position: 'top-center',
-                    style: {
-                      background: '#34D36F',
-                      color: 'white',
-                    },
-                  });
-                handleclose()
-            } catch (error) {
-                toast.error('Suppression admin echouée!',{
-                    duration: 3000,
-                    position: 'top-center',
-                    style: {
-                      background: 'red',
-                      color: 'white',
-                    },
-                  });
-            }
-        }, 2000);
-    }
-
-    const handleclickopen = (id) =>{
-        setid(id)
-        handleopen(true)
-
-    }
-    
-    const handleclose = () =>{
-        handleopen(false)
-    }
-
-    const handleclickopenvalidation = () =>{
-        if (isok.trim() === "Oui je suis sur"){
-            setisloading(true)
-            handleopenvalidation(true)
-    
-            
-            setTimeout(() => {
-                setisloading(false)
-            }, 2000);
-        
-        }
-        else{
-            toast.error('Mots incompatible!',{
-                duration: 3000,
-                position: 'top-center',
-                style: {
-                  background: 'red',
-                  color: 'white',
-                },
-              }); 
-        }
-
-    }
-    
-    const handleclosevalidation = () =>{
-        handleopenvalidation(false)
-    }
-
-
-
-
-
-    const fetchdata = async () => {
-        setisloading (true)
-        setTimeout( async() => {
-            try {
-              const {data } = await axios.get('http://localhost:3001/auth/getalladmins')
-              setadmins(data)  
-              setisloading(false)
-              toast.success('Données bien reçus !',{
-                duration: 3000,
-                position: 'top-center',
-                style: {
-                  background: '#34D36F',
-                  color: 'white',
-                },
-              });
-            } catch (error) {
-                toast.error('Données pas reçus!',{
-                    duration: 3000,
-                    position: 'top-center',
-                    style: {
-                      background: 'red',
-                      color: 'white',
-                    },
-                  });
-            }
-        }, 3000);
-
-    }
-    useEffect(() =>{
-        fetchdata()
-    },[axios])
   return (
-    <div className='flex flex-col min-h-screen bg-gray-100 '>
-    <div className='flex flex-row h-screen'>
-        <NavBarAdmin></NavBarAdmin> 
-        <Toaster></Toaster>
-        <div className='flex-1 p-6 overflow-scroll '>
-          <div className=' w-full flex flex-col justify-items-start items-center'>
-            <div className=' bg-white w-[90%] flex flex-row justify-between py-3 px-2 items-center border-gray-300 shadow-mt shadow-gray-300 '>
-            <h1 className=' text-center py-2 px-3 font-bold text-2xl rounded-xl '>Liste des admins</h1>
-            <button className='px-10 py-2 bg-black text-white rounded font-medium text-center' onClick={handleclickopencreation}>+Ajouter</button>
-            </div>
-            {isloading ? (
-                <div className='w-[90%] flex flex-col justify-center items-center h-[400px] bg-white rounded-xl'>
-                    <ClapSpinner size = {50} ></ClapSpinner>
-                </div>
-            ):(
-                <>
-                    <div className=' w-full flex flex-col justify-center items-center my-10 '>
-                {admins.map(item => {
-                    return (
-                <div className='w-[90%] bg-white rounded-xl flex flex-row justify-between items-center py-3 px-2 my-2'>
-                <CgProfile className=' text-2xl mx-2 '></CgProfile>
-                <div className='flex flex-row justify-center items-center'>
-                    <h1 className='text-xl font-medium mx-2 '>{item.firstname}</h1>
-                    <h1 className='text-xl font-medium mx-2 ' >{item.lastname}</h1>
-                </div>
-                <div className='flex flex-row justify-center items-center'>
-                <h1 className='text-xl font-medium mx-2 '>{item.email}</h1>
+    <div className="ManageAdminsPage bg-gray-100 min-h-screen">
+      {/* Barre de navigation pour l'administrateur */}
+      <NavBarAdmin />
+      <div className="ml-72 p-8">
+        <h2 className="text-3xl font-bold mb-8 text-gray-800">Gérer les Admins</h2>
 
-                </div>
-                <FaTrashAlt className=' text-2xl text-red-500 ' onClick={() => handleclickopen(item.id)}>
-
-                </FaTrashAlt>
-                </div>
-
-)
-})}
-</div>
-                </>
-            )}
-          </div>
-
+        {/* Bouton pour ajouter un nouvel administrateur */}
+        <div className="mb-4">
+          <Fab color="primary" aria-label="add" onClick={handleAddAdminClick}>
+            <FaUserPlus />
+          </Fab>
+          <span className="ml-4 text-gray-600">Ajouter un nouvel admin</span>
         </div>
 
+        {/* Tableau affichant les administrateurs */}
+        <TableContainer component={Paper}>
+          <Table>
+            <TableHead>
+              <TableRow>
+                <TableCell>Nom d'utilisateur</TableCell>
+                <TableCell>Email</TableCell>
+                <TableCell>Prénom</TableCell>
+                <TableCell>Nom de famille</TableCell>
+                <TableCell>Actions</TableCell>
+              </TableRow>
+            </TableHead>
+            <TableBody>
+              {loading ? (
+                // Affiche un spinner si les données sont en cours de chargement
+                <TableRow>
+                  <TableCell colSpan={5} align="center">
+                    <FaSpinner className="animate-spin text-4xl text-gray-400" />
+                  </TableCell>
+                </TableRow>
+              ) : (
+                // Affiche les administrateurs
+                admins.map((admin) => (
+                  <TableRow key={admin.id}>
+                    <TableCell>{admin.username}</TableCell>
+                    <TableCell>{admin.email}</TableCell>
+                    <TableCell>{admin.firstName}</TableCell>
+                    <TableCell>{admin.lastName}</TableCell>
+                    <TableCell>
+                      <IconButton onClick={() => handleDeleteClick(admin)}>
+                        <FaTrashAlt />
+                      </IconButton>
+                    </TableCell>
+                  </TableRow>
+                ))
+              )}
+            </TableBody>
+          </Table>
+        </TableContainer>
 
-        <Dialog open ={open} onClose={handleclose}  >
-                        <DialogTitle>
-                            <h1 className='text-start font-bold text-2xl '>
-                                Etes-vous sûr ?
-                            </h1>
-                        </DialogTitle>
-                        <DialogContent>
-                            <DialogContentText className='w-[400px] '>
-                                <div className='w-full flex flex-col justify-center items-center'>
-                                    <h1 className='w-[300px] px-2 py-1 text-center bg-red-100 text-red-600 my-2'>
-                                        Tape: Oui je suis sûr
-                                    </h1>
-                                    <input value={isok} onChange={(e) => setisok(e.target.value)} type="text" className='w-[300px] px-2 py-1 text-gray-500 border-2 border-gray-300 rounded my-1 ' />
-                                    <div className='w-full flex flex-row justify-center items-center'>
-                                    <button onClick={handleclose} className="text-white bg-black px-2 py-2 text-center mx-2 my-1 font-bold">Fermer</button>
-                                    <button onClick={handleclickopenvalidation} className="text-white bg-black px-2 py-2 text-center mx-2 my-1 font-bold">Valider</button>
+        {/* Boîte de dialogue de confirmation de suppression */}
+        <Dialog open={isConfirmDialogOpen} onClose={() => setIsConfirmDialogOpen(false)}>
+          <DialogTitle>Confirmer la suppression</DialogTitle>
+          <DialogContent>
+            <DialogContentText>
+              Êtes-vous sûr de vouloir supprimer l'administrateur <strong>{selectedAdmin?.username}</strong> ?
+            </DialogContentText>
+          </DialogContent>
+          <DialogActions>
+            <Button onClick={() => setIsConfirmDialogOpen(false)} color="primary">
+              Annuler
+            </Button>
+            <Button onClick={handleConfirmDelete} color="secondary">
+              Confirmer
+            </Button>
+          </DialogActions>
+        </Dialog>
 
-                                    </div>
-                                </div>
-                            </DialogContentText>
-                        </DialogContent>
-                    </Dialog>
+        {/* Boîte de dialogue d'authentification pour la suppression */}
+        <Dialog open={isAuthDialogOpen} onClose={() => setIsAuthDialogOpen(false)}>
+          <DialogTitle>Authentification Requise</DialogTitle>
+          <DialogContent>
+            <DialogContentText>
+              Veuillez entrer votre email et mot de passe pour confirmer votre identité et supprimer l'administrateur <strong>{selectedAdmin?.username}</strong>.
+            </DialogContentText>
+            <TextField
+              margin="dense"
+              label="Email"
+              type="email"
+              fullWidth
+              value={adminEmail}
+              onChange={(e) => setAdminEmail(e.target.value)}
+            />
+            <TextField
+              margin="dense"
+              label="Mot de passe"
+              type="password"
+              fullWidth
+              value={adminPassword}
+              onChange={(e) => setAdminPassword(e.target.value)}
+            />
+          </DialogContent>
+          <DialogActions>
+            <Button onClick={() => setIsAuthDialogOpen(false)} color="primary">
+              Annuler
+            </Button>
+            <Button onClick={handleDeleteAdmin} color="secondary">
+              Supprimer
+            </Button>
+          </DialogActions>
+        </Dialog>
 
-                    <Dialog open ={openvalidation} onClose={handleclosevalidation}  >
-                        <DialogTitle>
-                            <h1 className='text-start font-bold text-2xl '>
-                                Entrez vos données d'authentification
-                            </h1>
-                        </DialogTitle>
-                        <DialogContent>
-                        
-                        {isloading ? (
-                            <div className='w-[400px] h-[200px] bg-white flex flex-row justify-center items-center text-center '>
-                            <RotateSpinner className='flex flex-row justify-center items-center w-full mx-auto float-right' size={45} color="#000"  ></RotateSpinner>
-                        </div>
-                        ):(
-                            <>
-                            <DialogContentText className='w-[400px] '>
-                                <div className='w-full flex flex-col justify-center items-center'>
-                                    <h1 className='w-[300px] px-2 py-1 text-center bg-red-100 text-red-600 my-2'>
-                                        Entrez Email/Password
-                                    </h1>
-                                    <input value={email} onChange={(e) => setemail(e.target.value)} type="email" className='w-[300px] px-2 py-1 text-gray-500 border-2 border-gray-300 rounded my-1 ' />
-                                    <input value={password} onChange={(e) => setpassword(e.target.value)} type="password" className='w-[300px] px-2 py-1 text-gray-500 border-2 border-gray-300 rounded my-1 ' />
-                                    <div className='w-full flex flex-row justify-center items-center'>
-                                    <button onClick={handleclosevalidation} className="text-white bg-black px-2 py-2 text-center mx-2 my-1 font-bold">Fermer</button>
-                                    <button onClick={authenticate} className="text-white bg-black px-2 py-2 text-center mx-2 my-1 font-bold">Valider</button>
-
-                                    </div>
-                                </div>
-                            </DialogContentText>
-                            
-                            </>
-                        )}
-                        </DialogContent>
-                    </Dialog>
-                    <Dialog open ={opencreation} onClose={handleclosecreation}  >
-                        <DialogTitle>
-                            <h1 className='text-start font-bold text-2xl '>
-                                {iscreated ? " Un nouvel admin est créé":"Création d'un nouvel admin"}
-                                
-                            </h1>
-                        </DialogTitle>
-                        <DialogContent>
-                            <DialogContentText className='w-[400px] '>
-                                {isloading ? (
-                                    <div className="flex flex-col justify-center items-center w-full">
-
-                                        <RotateSpinner size= {50} ></RotateSpinner>
-                                    </div>
-                                ):(
-                                    <>
-                                    {
-                                        iscreated?(
-                                            <Checkmark />
-                                        ):(
-                              <div className='w-full flex flex-col justify-start items-center'>
-                                <div className='w-full flex flex-col justify-start items-center'>
-                                    <label className='text-start w-full' htmlFor="">Nom</label>
-                                    <input value={nom} onChange={(e) =>setnom  (e.target.value)}  type='text' className="text-center border-2 border-gray-300 my-2 px-2 py-2 rounded w-full "/>
-                                </div>
-                                <div className='w-full flex flex-col justify-start items-center' >
-                                    <label className='text-start w-full' htmlFor="">Prenom</label>
-                                    <input value={prenom} onChange={(e) =>setprenom  (e.target.value)}  type='text' className="text-center border-2 border-gray-300 my-2 px-2 py-2 rounded w-full "/>
-                                </div >
-                                <div className='w-full flex flex-col justify-start items-center' >
-                                    <label className='text-start w-full' htmlFor="">Username</label>
-                                    <input value={username} onChange={(e) =>setusername  (e.target.value)}  type='text' className="text-center border-2 border-gray-300 my-2 px-2 py-2 rounded w-full "/>
-                                </div>
-                                <div className='w-full flex flex-col justify-start items-center' >
-                                    <label className='text-start w-full' htmlFor="">Email</label>
-                                    <input value={email} onChange={(e) =>setemail  (e.target.value)}  type="email" className="text-center border-2 border-gray-300 my-2 px-2 py-2 rounded w-full "/>
-                                </div>
-                                <div className='w-full flex flex-col justify-start items-center' >
-                                    <label className='text-start w-full' htmlFor="">Password</label>
-                                    <input value={password} onChange={(e) =>setpassword(e.target.value)} type="password" className="text-center border-2 border-gray-300 my-2 px-2 py-2 rounded w-full "/>
-                                </div>
-                                <button onClick={createadmin} className='w-full bg-black text-white py-2 text-center px-2 rounded' >Créer</button>
-                              </div> 
-
-                                        )
-                                    }</>
-                                )}
-                                
-                            </DialogContentText>
-                        </DialogContent>
-                    </Dialog>
+        {/* Boîte de dialogue pour ajouter un nouvel administrateur */}
+        <Dialog open={isAddDialogOpen} onClose={() => setIsAddDialogOpen(false)}>
+          <DialogTitle>Ajouter un nouvel administrateur</DialogTitle>
+          <DialogContent>
+            <TextField
+              margin="dense"
+              label="Nom d'utilisateur"
+              fullWidth
+              value={newAdmin.username}
+              onChange={(e) => setNewAdmin({ ...newAdmin, username: e.target.value })}
+            />
+            <TextField
+              margin="dense"
+              label="Prénom"
+              fullWidth
+              value={newAdmin.firstName}
+              onChange={(e) => setNewAdmin({ ...newAdmin, firstName: e.target.value })}
+            />
+            <TextField
+              margin="dense"
+              label="Nom de famille"
+              fullWidth
+              value={newAdmin.lastName}
+              onChange={(e) => setNewAdmin({ ...newAdmin, lastName: e.target.value })}
+            />
+            <TextField
+              margin="dense"
+              label="Email"
+              type="email"
+              fullWidth
+              value={newAdmin.email}
+              onChange={(e) => setNewAdmin({ ...newAdmin, email: e.target.value })}
+            />
+            <TextField
+              margin="dense"
+              label="Mot de passe"
+              type="password"
+              fullWidth
+              value={newAdmin.password}
+              onChange={(e) => setNewAdmin({ ...newAdmin, password: e.target.value })}
+            />
+            <TextField
+              margin="dense"
+              label="Confirmez le mot de passe"
+              type="password"
+              fullWidth
+              value={newAdmin.confirmedPassword}
+              onChange={(e) => setNewAdmin({ ...newAdmin, confirmedPassword: e.target.value })}
+            />
+          </DialogContent>
+          <DialogActions>
+            <Button onClick={() => setIsAddDialogOpen(false)} color="primary">
+              Annuler
+            </Button>
+            <Button onClick={handleAddAdmin} color="primary">
+              Ajouter
+            </Button>
+          </DialogActions>
+        </Dialog>
+      </div>
     </div>
-</div>
-  )
-}
+  );
+};
 
-export default Admins
+export default ManageAdminsPage;

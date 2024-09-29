@@ -1,55 +1,59 @@
-import React from 'react'
+import React from 'react';
+import { FaFacebookF, FaTwitter, FaInstagram } from 'react-icons/fa';
 
 const Footer = () => {
   return (
-    <div className='w-full h-[30vh] bg-black py-8   '>
-      <div className='container mx-auto px-4 grid grid-cols-1 md:grid-cols-4 gap-8'> 
-        <div className='flex flex-col justify-start items-start'>
-          <h2 className='  text-4xl md:text-3xl font-bold text-center bg-clip-text text-transparent bg-gradient-to-b from-neutral-50 to-neutral-400 bg-opacity-50'>Catégories</h2>
-          <div className='flex flex-col justify-start items-start '>
-            <a className='text-white '>Mathematique</a>
-            <a className='text-white '>Histoire</a>
-            <a className='text-white '>Sports</a>
-            <a className='text-white '>Connaissances générales</a>
-            <a className='text-white '>Informatique</a>
+    <footer className="bg-gray-800 text-white py-8">
+      <div className="container mx-auto px-4">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-8 text-center md:text-left">
+          
+          {/* Section 1 : Liens importants */}
+          <div>
+            <h3 className="text-lg font-bold mb-4">Plan du site</h3>
+            <ul className="space-y-2">
+              <li><a href="#" className="hover:text-gray-400">Accueil</a></li>
+              <li><a href="#about" className="hover:text-gray-400">À propos</a></li>
+              <li><a href="#categories" className="hover:text-gray-400">Catégories</a></li>
+              <li><a href="#contact" className="hover:text-gray-400">Contact</a></li>
+              <li><a href="#auth" className="hover:text-gray-400">Authentification</a></li>
+            </ul>
           </div>
-        </div>
-        <div className='flex flex-col justify-start items-start'>
-          <div className='flex flex-col justify-start items-start '>          <h2 className='  text-4xl md:text-3xl font-bold text-center bg-clip-text text-transparent bg-gradient-to-b from-neutral-50 to-neutral-400 bg-opacity-50'>Ressources</h2>
 
-            <a className='text-white ' href='#' >Accueil</a>
-            <a className='text-white ' href='#' >A propos</a>
-            <a className='text-white ' href='#' >Types de Quiz</a>
-            <a className='text-white ' href='#' >Contacts</a>
-            <a className='text-white ' href='#' >Connexion</a>
+          {/* Section 2 : Réseaux sociaux */}
+          <div>
+            <h3 className="text-lg font-bold mb-4">Suivez-nous</h3>
+            <div className="flex justify-center md:justify-start space-x-4">
+              <a href="https://facebook.com" className="hover:text-gray-400">
+                <FaFacebookF size={24} />
+              </a>
+              <a href="https://twitter.com" className="hover:text-gray-400">
+                <FaTwitter size={24} />
+              </a>
+              <a href="https://instagram.com" className="hover:text-gray-400">
+                <FaInstagram size={24} />
+              </a>
+            </div>
           </div>
-        </div>
-        <div className='flex flex-col justify-start items-start'>
-          <h2 className='  text-4xl md:text-3xl font-bold text-center bg-clip-text text-transparent bg-gradient-to-b from-neutral-50 to-neutral-400 bg-opacity-50'>Contacts </h2>
-          <div className='flex flex-col justify-start items-start '>
-            <a className='text-white '>Mathematique</a>
-            <a className='text-white '>Histoire</a>
-            <a className='text-white '>Sports</a>
-            <a className='text-white '>Connaissances générales</a>
-            <a className='text-white '>Informatique</a>
-          </div>
-        </div>
-        <div className='flex flex-col justify-start items-start'>
-          <h2 className='  text-4xl md:text-3xl font-bold text-center bg-clip-text text-transparent bg-gradient-to-b from-neutral-50 to-neutral-400 bg-opacity-50'>Site Web </h2>
-          <div className='flex flex-col justify-start items-start '>
-            <a className='text-white '>Vie privée</a>
-            <a className='text-white '>Presse</a>
-            <a className='text-white '>Conditions d'utilisation</a>
-            <a className='text-white '>Policy</a>
-           
-          </div>
-        </div>
-          </div>
-          <div className='container flex flex-row justify-around items-center  mx-auto px-4 mt-8 text-center border-t border-gray-700 pt-4 text-sm text-gray-300'>
-            <p>&copy; Copyright Tous les droits sont réservés</p>
-          </div>
-    </div>
-  )
-}
 
-export default Footer
+          {/* Section 3 : Informations de contact */}
+          <div>
+            <h3 className="text-lg font-bold mb-4">Contactez-nous</h3>
+            <p className="text-gray-400">
+              Email : <a href="mailto:contact@monquiz.com" className="hover:text-gray-400">contact@quizstan.com</a>
+            </p>
+            <p className="text-gray-400">
+              Téléphone : <a href="tel:+123456789" className="hover:text-gray-400">+123 456 789</a>
+            </p>
+          </div>
+        </div>
+
+        {/* Droits d'auteur */}
+        <div className="mt-8 text-center text-gray-400 text-sm">
+          &copy; {new Date().getFullYear()} QuizStan. Tous droits réservés.
+        </div>
+      </div>
+    </footer>
+  );
+};
+
+export default Footer;

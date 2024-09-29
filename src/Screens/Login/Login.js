@@ -1,94 +1,313 @@
-import React, { useState } from 'react'
-import Navbar from '../../Components/NavBar/Navbar'
-import {toast,Toaster} from 'react-hot-toast'
-import { MdAlternateEmail } from "react-icons/md"
-import { RiLockPasswordLine } from "react-icons/ri"
-import NewNav from '../../Components/newNav'
-import axios from 'axios'
-import {useNavigate} from 'react-router-dom'
-import { RotateSpinner } from 'react-spinners-kit'
+import React, { useState } from 'react';
+import { FaEye, FaEyeSlash } from 'react-icons/fa';
+import Navbar from '../../Components/newNav';
+import Footer from '../../Components/Footer/Footer';
+import axios from 'axios';
+import { BASE_URL } from '../../Components/Constant';
+import { toast, Toaster } from'react-hot-toast';
 
+const AuthPage = () => {
+  // État pour déterminer si l'utilisateur est sur le formulaire de connexion ou d'inscription
+  const [isLogin, setIsLogin] = useState(true);
+  
+  // État pour afficher ou masquer le mot de passe
+  const [showPassword, setShowPassword] = useState(false);
+  
+  // État pour stocker les informations du formulaire
+  const [formData, setFormData] = useState({
+    email: '',
+    password: '',
+    username: '',
+    firstName: '',
+    lastName: '',
+    role: 'player', // Rôle par défaut pour la connexion
+  });
 
+  // Change entre le formulaire de connexion et d'inscription
+  const toggleForm = () => {
+    setIsLogin(!isLogin);
+  };
 
-const Login = () => {
-  const [ Email, setEmail] = useState()
-  const [Password, setPassword] = useState()
-  const [isloading, setisloading] = useState(false)
-  const Navigate = useNavigate()
-  const handleSubmit = async() => {
-    setisloading(true)
-    setTimeout(async() => {
-      try {
-        const response = await axios.post("http://localhost:3001/auth/login", {
-          email: Email,
-          password: Password,
-        })
-        toast.success('Connexion réussie!',{
-          duration: 3000,
-          position: 'top-center',
-          style: {
-            background: '#34D36F',
-            color: 'white',
-          },
+  // Bascule l'affichage du mot de passe entre visible et masqué
+  const togglePasswordVisibility = () => {
+    setShowPassword(!showPassword);
+  };
+
+  // Met à jour les valeurs du formulaire
+  const handleChange = (e) => {
+    setFormData({
+      ...formData,
+      [e.target.name]: e.target.value,
+    });
+  };
+
+  // Gère la soumission du formulaire de connexion
+  const handleLogin = async (e) => {
+    e.preventDefault();
+    try {
+      if (formData.role === "player") {
+        const response = await axios.post(BASE_URL + 'users/login', {
+          email: formData.email,
+          password: formData.password,
+          role: formData.role,
         });
-        Navigate('/dashboard')
-        setisloading(false)
-      } catch (error) {
-        toast.error('Connexion echouée!',{
-          duration: 3000,
-          position: 'top-center',
-          style: {
-            background: 'red',
-            color: 'white',
-          },
-        });
-        setisloading(false)
-      }
-    }, 3000);
-    
-    
-    
-  }
-  return (
-    <>
-      <NewNav />
-      <Toaster>
+        toast.success('Bien authentifié')
+        localStorage.setItem('user', JSON.stringify(response.data));
 
-      </Toaster>
-      <div className='w-full h-[100vh] mx-auto flex flex-row justify-center items-center '>
         
-        <div className='w-[400px] min-h-[300px] border-2 border-gray-400 rounded-xl flex flex-col justify-start items-center '>
-        <h1 className='my-2 text-center font-semibold text-3xl '>Login</h1>
-          <div className='w-full flex flex-col justify-start items-start ml-4 mt-4'>
-            <div className='w-full flex flex-row justify-start items-center'>
-            <MdAlternateEmail className='text-lg text-blue-500 mr-2'/>
-            <label className='text-lg text-start font-semibold '>
-            Email
+        // Redirige vers la page d'accueil de l'utilisateur
+        window.location.href = '/DashboardUser';
 
-          </label>
-            </div>
-          
-          <input type='email' value={Email} onChange={(e)=> setEmail(e.target.value)} placeholder='Entrez votre email' className='w-[95%] h-[50px] border-2 border-gray-300 rounded-lg px-2 text-start my-2 ' >
-          </input>
+      } else {
+        console.log(formData);
+        const response = await axios.post(BASE_URL + 'auth/login', {
+          email: formData.email,
+          password: formData.password
+        });
+        console.log(response);
+        toast.success('Bien authentifié')
+        // Stocke le token JWT
+        localStorage.setItem('user', JSON.stringify(response.data));
+        
+        
+        // Redirige vers la page d'accueil de l'administrateur
+        window.location.href = '/Dashboard';
+      }
+    } catch (error) {
+      console.error('Login failed:', error);
+      toast.error("ll y a un probleme avec l'authentification de votre compte")
+    }
+  };
+ 
+  // Gère la soumission du formulaire d'inscription
+  const handleSignup = async (e) => {
+    e.preventDefault();
+    try {
+      const response = await axios.post(BASE_URL + 'users/signup', {
+        username: formData.username,
+        email: formData.email,
+        password: formData.password,
+        firstName: formData.firstName,
+        lastName: formData.lastName,
+      });
+      
+      // Stocke le token JWT
+      localStorage.setItem('user', JSON.stringify(response.data));
+      
+      // Redirige vers la page d'accueil
+      window.location.href = '/DashboardUser';
+    } catch (error) {
+      console.error('Signup failed:', error.response.data)
+      toast.error("ll y a un probleme avec l'authentification de votre compte");
+    }
+  };
 
-          </div>
-          <div className='w-full flex flex-col justify-start items-start ml-4 mt-4  '>
-            <div className='w-full flex flex-row justify-start items-center'>
-              <RiLockPasswordLine className='text-lg text-blue-500 mr-2'/>
-            <label className='text-lg text-start font-semibold '>password</label>
+  return (
+    <div className="AuthPage">
+      <Navbar />
+
+      {/* Conteneur du formulaire d'authentification */}
+      <section className="py-12 bg-gray-100">
+        <Toaster></Toaster>
+        <div className="container mx-auto px-4">
+          <div className="max-w-md mx-auto bg-white shadow-lg rounded-lg p-8">
+            <h2 className="text-2xl font-bold mb-6 text-center">
+              {isLogin ? "Connexion" : "Inscription"}
+            </h2>
+
+            {/* Bascule entre le formulaire de connexion et d'inscription */}
+            <div className="text-center mb-6">
+              <p className="text-gray-600">
+                {isLogin ? "Vous n'avez pas de compte?" : "Vous avez déjà un compte?"}
+                <button
+                  onClick={toggleForm}
+                  className="text-blue-600 font-bold ml-2"
+                >
+                  {isLogin ? "Inscrivez-vous" : "Connectez-vous"}
+                </button>
+              </p>
             </div>
-            
-              <input type='password' value={Password} onChange={(e)=> setPassword(e.target.value)} placeholder='Entrez votre mot de passe' className='w-[95%] h-[50px] border-2 border-gray-300 rounded-lg px-2 text-start my-2 ' >
-          </input>
-          </div>
-          <div className='w-full flex justify-center items-center mt-4'>
-            <button onClick={handleSubmit} className='text-white w-[95%]  bg-black rounded-lg px-5 py-2 mb-4 flex flex-row justify-center items-center '>{isloading ? (<RotateSpinner size={20} color="#fff"></RotateSpinner>):"Se connecter"} </button>
+
+            {/* Formulaire de connexion */}
+            {isLogin && (
+              <form onSubmit={handleLogin}>
+                {/* Champ de saisie pour l'email */}
+                <div className="mb-4">
+                  <label className="block text-gray-700 text-sm font-bold mb-2" htmlFor="email">
+                    Email
+                  </label>
+                  <input
+                    type="email"
+                    id="email"
+                    name="email"
+                    value={formData.email}
+                    onChange={handleChange}
+                    className="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-300"
+                    required
+                  />
+                </div>
+
+                {/* Champ de saisie pour le mot de passe */}
+                <div className="mb-4 relative">
+                  <label className="block text-gray-700 text-sm font-bold mb-2" htmlFor="password">
+                    Mot de passe
+                  </label>
+                  <input
+                    type={showPassword ? "text" : "password"}
+                    id="password"
+                    name="password"
+                    value={formData.password}
+                    onChange={handleChange}
+                    className="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-300"
+                    required
+                  />
+                  <button
+                    type="button"
+                    onClick={togglePasswordVisibility}
+                    className="absolute right-3 top-10 text-gray-500"
+                  >
+                    {showPassword ? <FaEyeSlash /> : <FaEye />}
+                  </button>
+                </div>
+
+                {/* Sélection du rôle */}
+                <div className="mb-4">
+                  <label className="block text-gray-700 text-sm font-bold mb-2" htmlFor="role">
+                    Rôle
+                  </label>
+                  <select
+                    id="role"
+                    name="role"
+                    value={formData.role}
+                    onChange={handleChange}
+                    className="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-300"
+                    required
+                  >
+                    <option value="player">Joueur</option>
+                    <option value="admin">Admin</option>
+                  </select>
+                </div>
+
+                {/* Bouton de soumission */}
+                <div className="text-center">
+                  <button
+                    type="submit"
+                    className="bg-blue-600 text-white px-6 py-3 rounded-lg hover:bg-blue-700 transition ease-in-out duration-300"
+                  >
+                    Connexion
+                  </button>
+                </div>
+              </form>
+            )}
+
+            {/* Formulaire d'inscription */}
+            {!isLogin && (
+              <form onSubmit={handleSignup}>
+                {/* Champ de saisie pour le nom d'utilisateur */}
+                <div className="mb-4">
+                  <label className="block text-gray-700 text-sm font-bold mb-2" htmlFor="username">
+                    Nom d'utilisateur
+                  </label>
+                  <input
+                    type="text"
+                    id="username"
+                    name="username"
+                    value={formData.username}
+                    onChange={handleChange}
+                    className="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-300"
+                    required
+                  />
+                </div>
+
+                {/* Champ de saisie pour l'email */}
+                <div className="mb-4">
+                  <label className="block text-gray-700 text-sm font-bold mb-2" htmlFor="email">
+                    Email
+                  </label>
+                  <input
+                    type="email"
+                    id="email"
+                    name="email"
+                    value={formData.email}
+                    onChange={handleChange}
+                    className="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-300"
+                    required
+                  />
+                </div>
+
+                {/* Champ de saisie pour le mot de passe */}
+                <div className="mb-4 relative">
+                  <label className="block text-gray-700 text-sm font-bold mb-2" htmlFor="password">
+                    Mot de passe
+                  </label>
+                  <input
+                    type={showPassword ? "text" : "password"}
+                    id="password"
+                    name="password"
+                    value={formData.password}
+                    onChange={handleChange}
+                    className="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-300"
+                    required
+                  />
+                  <button
+                    type="button"
+                    onClick={togglePasswordVisibility}
+                    className="absolute right-3 top-10 text-gray-500"
+                  >
+                    {showPassword ? <FaEyeSlash /> : <FaEye />}
+                  </button>
+                </div>
+
+                {/* Champ de saisie pour le prénom */}
+                <div className="mb-4">
+                  <label className="block text-gray-700 text-sm font-bold mb-2" htmlFor="firstName">
+                    Prénom
+                  </label>
+                  <input
+                    type="text"
+                    id="firstName"
+                    name="firstName"
+                    value={formData.firstName}
+                    onChange={handleChange}
+                    className="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-300"
+                    required
+                  />
+                </div>
+
+                {/* Champ de saisie pour le nom de famille */}
+                <div className="mb-4">
+                  <label className="block text-gray-700 text-sm font-bold mb-2" htmlFor="lastName">
+                    Nom de famille
+                  </label>
+                  <input
+                    type="text"
+                    id="lastName"
+                    value={formData.lastName}
+                    onChange={handleChange}
+                    name="lastName"
+                    className="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-300"
+                    required
+                  />
+                </div>
+
+                {/* Bouton de soumission */}
+                <div className="text-center">
+                  <button
+                    type="submit"
+                    className="bg-blue-600 text-white px-6 py-3 rounded-lg hover:bg-blue-700 transition ease-in-out duration-300"
+                  >
+                    Inscription
+                  </button>
+                </div>
+              </form>
+            )}
           </div>
         </div>
-        
-      </div>
-    </>
-  )
-}
+      </section>
 
-export default Login
+      <Footer />
+    </div>
+  );
+};
+
+export default AuthPage;

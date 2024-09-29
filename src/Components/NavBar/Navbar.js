@@ -1,35 +1,49 @@
-import React from 'react'
-import "./Navbar.css"
-import {Zoom,Fade}from "react-awesome-reveal"
+// components/Navbar.js
+import React, { useState } from 'react';
+import { FaBars, FaTimes } from 'react-icons/fa';
+import { Link } from'react-router-dom';
 
 const Navbar = () => {
-    const links = [
-        {name: "Home", path: "/"},
-        {name: "A propos", path: "/apropos"},
-        {name: "Login", path: "/login"},
-        {name: "S'inscrire", path: "/register"}
-  
-    ]
+  const [navOpen, setNavOpen] = useState(false);
+
   return (
-    <div className = "Container">
-        <Fade className='w-full' cascade damping={0.2} direction="left" >
-        <span className = "logo">Quiz App</span>
-            </Fade> 
+    <nav className="bg-gray-800 text-white fixed w-full z-10 top-0 shadow-lg">
+      <div className="container mx-auto flex justify-between items-center p-4">
+        {/* Logo */}
+        <Link className='cursor-pointer' to={'/'}>
+        <h1 className="text-2xl font-bold">QuizStan</h1>
         
-        <ul className = "nav-links">
-        <Zoom cascade damping={0.2} direction="up" > 
-        {links.map((link, index) => {
-            return (
-                <li key={index}>
-                    <a href={link.path}>{link.name}</a>
-                </li>
-            )
-        })}
-        </Zoom>
-        </ul>
+        </Link>
 
-    </div>
-  )
-}
+        {/* Nav links */}
+        <div className="hidden md:flex space-x-6">
+          <a href="#" className="hover:text-gray-300">Accueil</a>
+          <a href="#about" className="hover:text-gray-300">À propos</a>
+          <a href="#categories" className="hover:text-gray-300">Catégories</a>
+          <a href="#contact" className="hover:text-gray-300">Contact</a>
+          <a href="#auth" className="hover:text-gray-300">Authentification</a>
+        </div>
 
-export default Navbar
+        {/* Hamburger Menu for mobile */}
+        <div className="md:hidden">
+          <button onClick={() => setNavOpen(!navOpen)}>
+            {navOpen ? <FaTimes size={24} /> : <FaBars size={24} />}
+          </button>
+        </div>
+      </div>
+
+      {/* Mobile Menu */}
+      {navOpen && (
+        <div className="md:hidden bg-gray-800 p-4 space-y-4">
+          <a href="#" className="block hover:text-gray-300">Accueil</a>
+          <a href="#about" className="block hover:text-gray-300">À propos</a>
+          <a href="#categories" className="block hover:text-gray-300">Catégories</a>
+          <a href="#contact" className="block hover:text-gray-300">Contact</a>
+          <a href="#auth" className="block hover:text-gray-300">Authentification</a>
+        </div>
+      )}
+    </nav>
+  );
+};
+
+export default Navbar;

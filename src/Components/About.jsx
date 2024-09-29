@@ -1,45 +1,67 @@
-import React from 'react'
-import NewNav from './newNav'
-import Fade from 'react-awesome-reveal'
-import { Link } from 'react-router-dom'
-import Footer from './Footer/Footer'
+import React from 'react';
+import { FaLightbulb, FaBook, FaUsers, FaCogs } from 'react-icons/fa';
 
-const About = () => {
+const AboutSection = () => {
+  return (
+    <section id="about" className="py-12 bg-gray-100">
+      <div className="container mx-auto px-4">
+        {/* Titre principal de la section À propos */}
+        <h2 className="text-3xl font-bold text-center mb-8">À propos de QuizStan</h2>
 
-  return ( <>
-  
-  <NewNav>
-    </NewNav>
-    <section className='w-full py-12 md:py-24 lg:py-32 xl:py-48 bg-gradient-to-r from-[#6366F1] to-[#8B5CF6] text-white '>
-        <div className='w-full h-full flex flex-col justify-center items-center'>
-            <Fade cascade damping={0.2} direction="up" className='w-full flex flex-col justify-center items-center'>
-            <h1 className='text-6xl font-bold'>Qui sommes nous ?</h1>
-            <p className='text-lg w-[70%] px-4 my-6 text-center '>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nullam nec justo nec ex ullamcorper ullamcorper. Donec vel quam vel ipsum faucibus bibendum. Sed consectetur, velit in commodo tristique, felis dolor cursus purus, non finibus sem ligula in metus.</p>
-            <Link className='text-lg font-medium text-white px-4 py-2 rounded-lg hover:bg-gray-400 hover:text-white border-2 border-white py-4 px-8  '>Retour à la liste</Link>
-            </Fade>
+        {/* Grille pour les cartes de contenu */}
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
+          
+          {/* Carte 1 : Quiz Innovants */}
+          <div className="bg-white shadow-lg rounded-lg p-6 text-center hover:shadow-xl transition duration-300">
+            {/* Icône représentant l'innovation */}
+            <FaLightbulb className="text-4xl text-blue-500 mx-auto mb-4" />
+            {/* Titre de la carte */}
+            <h3 className="text-xl font-semibold mb-2">Quiz Innovants</h3>
+            {/* Description de la carte */}
+            <p className="text-gray-600">
+              Explorez une variété de quiz interactifs pour tester vos compétences dans différents domaines.
+            </p>
+          </div>
+
+          {/* Carte 2 : Catégories Variées */}
+          <div className="bg-white shadow-lg rounded-lg p-6 text-center hover:shadow-xl transition duration-300">
+            {/* Icône représentant les catégories */}
+            <FaBook className="text-4xl text-green-500 mx-auto mb-4" />
+            {/* Titre de la carte */}
+            <h3 className="text-xl font-semibold mb-2">Catégories Variées</h3>
+            {/* Description de la carte */}
+            <p className="text-gray-600">
+              Choisissez parmi une large gamme de catégories pour adapter le quiz à vos centres d'intérêt.
+            </p>
+          </div>
+
+          {/* Carte 3 : Communauté Active */}
+          <div className="bg-white shadow-lg rounded-lg p-6 text-center hover:shadow-xl transition duration-300">
+            {/* Icône représentant la communauté */}
+            <FaUsers className="text-4xl text-purple-500 mx-auto mb-4" />
+            {/* Titre de la carte */}
+            <h3 className="text-xl font-semibold mb-2">Communauté Active</h3>
+            {/* Description de la carte */}
+            <p className="text-gray-600">
+              Rejoignez une communauté de passionnés et partagez vos résultats avec vos amis.
+            </p>
+          </div>
+
+          {/* Carte 4 : Simplicité et Performance */}
+          <div className="bg-white shadow-lg rounded-lg p-6 text-center hover:shadow-xl transition duration-300">
+            {/* Icône représentant la performance */}
+            <FaCogs className="text-4xl text-red-500 mx-auto mb-4" />
+            {/* Titre de la carte */}
+            <h3 className="text-xl font-semibold mb-2">Simplicité et Performance</h3>
+            {/* Description de la carte */}
+            <p className="text-gray-600">
+              Notre application est rapide, simple d'utilisation et conçue pour vous offrir la meilleure expérience.
+            </p>
+          </div>
         </div>
-        </section>
-    <div className='w-full h-[30rem] flex flex-col justify-center items-center'>
-        <h1 className='text-3xl font-bold text-center my-4 '>
-            A propos 
-        </h1>
-        
-        <div className='w-[90%] h-[200px] shadow-md shadow-gray-300  flex flex-col justify-center items-center my-4'>
-        <Fade cascade direction="up" className='w-full flex flex-col justify-center items-center'>
+      </div>
+    </section>
+  );
+};
 
-            <q className='text-center text-lg p-4 text-gray-500'>Lorem ipsum dolor sit amet consectetur adipisicing elit. Maxime, corporis assumenda. Expedita, similique repellat! Porro quos dicta consequatur fugiat officiis aliquam accusantium odio cum. Dolorum rem atque quisquam sapiente blanditiis.</q>
-             <p className='text-center my-2 text-gray-700 underline '>
-                QuizCom
-             </p>
-             </Fade>
-             </div>
-
-        
-            
-    </div>
-    <Footer></Footer>
-    </>
-  )
-}
-
-export default About
+export default AboutSection;

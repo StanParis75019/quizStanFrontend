@@ -1,32 +1,62 @@
-import React from 'react'
-import { Fade } from 'react-awesome-reveal';
-import {toast, Toaster} from 'react-hot-toast'
+import axios from 'axios';
+import React, { useState } from 'react';
+import { BASE_URL } from '../Constant';
+import {toast, Toaster} from 'react-hot-toast';
 
-
-const Newsletter = () => {
-  const success = (e) =>{
+const NewsletterSection = () => {
+  const [email, setEmail] = useState('');
+const [isloading, setisloading] = useState(false)
+  // Gère l'envoi du formulaire
+  const handleSubmit = async (e)  => {
     e.preventDefault();
-    
-    toast.success('Merci de votre inscription!');
-  } 
+    setisloading(true)
+    // Logique de souscription ici
+    try {
+      await axios.post(BASE_URL+'newsletter/create', {email})
+      toast.success("Vous etes inscrit à la Newsletter")
+    } catch (error) {
+      toast.error("Erreur d'envoi")
+    }
+    setEmail(''); // Réinitialise le champ de saisie après la soumission
+  };
+
   return (
-    <div className='w-[90%] mx-auto rounded-xl my-10  h-full flex flex-col justify-center items-center bg-gradient-to-r from-[#6366F1] to-[#8B5CF6] p-4  text-white '>
-      <Toaster position="top-center" />
-      <Fade cascade damping={0.2} direction='up'>
-      <h1 className='text-4xl text-center text-white my-5 '>Newsletter</h1>
-      <p>Inscrivez-vous à notre newsletter pour recevoir nos dernières informations et promotions.</p>
-      <form className='w-full flex flex-col justify-center items-center'>
-        <input className='text-gray-100 rounded-xl p-2 my-2 w-[350px] bg-transparent transparent border-2 border-gray-100' type='text' placeholder='Votre adresse email' />
-        <button onClick={success} className='text-white bg-black rounded-xl px-5 py-2 ' type='submit'>S'inscrire</button>
-      </form>
+    <section id="newsletter" className="py-12 bg-blue-600">
+      <Toaster></Toaster>
+      <div className="container mx-auto px-4">
+        <div className="text-center mb-8">
+          {/* Titre de la section */}
+          <h2 className="text-3xl font-bold text-white">Abonnez-vous à notre Newsletter</h2>
+          {/* Description de la section */}
+          <p className="text-blue-200 mt-2">Recevez les dernières mises à jour et quiz directement dans votre boîte email.</p>
+        </div>
 
-      <p>Nous ne partageons pas votre adresse email avec des tiers.</p>
-      </Fade>
-      
-   
+        {/* Formulaire d'inscription */}
+        <div className="flex justify-center">
+          <form onSubmit={handleSubmit} className="w-full max-w-md">
+            <div className="flex flex-col sm:flex-row items-center">
+              {/* Champ de saisie pour l'email */}
+              <input
+                type="email"
+                placeholder="Entrez votre email"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                className="w-full p-3 rounded-full text-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-300 mb-4 sm:mb-0 sm:mr-4"
+                required
+              />
+              {/* Bouton de soumission */}
+              <button
+                type="submit"
+                className="w-full sm:w-auto bg-white text-blue-600 font-semibold py-3 px-6 rounded-full hover:bg-blue-100 transition ease-in-out duration-300"
+              >
+                S'abonner
+              </button>
+            </div>
+          </form>
+        </div>
+      </div>
+    </section>
+  );
+};
 
-    </div>
-  )
-}
-
-export default Newsletter
+export default NewsletterSection;

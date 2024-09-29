@@ -5,10 +5,10 @@ import { FaTrashAlt } from 'react-icons/fa';
 import NavBarAdmin from '../../Components/NavBar/NavBarAdmin';
 import { BASE_URL } from '../../Components/Constant';
 
-const ManageUsersPage = () => {
+const NewsletterAdmin = () => {
   // État pour stocker la liste des utilisateurs récupérés du backend
-  const [users, setUsers] = useState([
-    { id: 1, username: "abdel", email: "abdel@gmail.com", role: "admin" }
+  const [users, setNewsletters] = useState([
+    { id: 1, username: "stan", email: "stan@gmail.com", role: "admin" }
   ]);
 
   // État pour l'utilisateur actuellement sélectionné pour la suppression
@@ -26,10 +26,11 @@ const ManageUsersPage = () => {
   useEffect(() => {
     const fetchUsers = async () => {
       try {
-        const response = await axios.get(BASE_URL+'users/all');
-        setUsers(response.data); // Met à jour l'état avec les utilisateurs récupérés
+        const response = await axios.get(BASE_URL+'newsletter/getall');
+        console.log(response.data)
+        setNewsletters(response.data); // Met à jour l'état avec les utilisateurs récupérés
       } catch (error) {
-        console.error('Erreur lors de la récupération des utilisateurs :', error);
+        console.error('Erreur lors de la récupération des Newsletters :', error);
       }
     };
     fetchUsers();
@@ -59,7 +60,7 @@ const ManageUsersPage = () => {
       });
       
       // Met à jour l'état en supprimant l'utilisateur de la liste localement
-      setUsers(users.filter((user) => user.id !== selectedUser.id));
+      setNewsletters(users.filter((user) => user.id !== selectedUser.id));
 
       // Réinitialise les champs et ferme les boîtes de dialogue
       setIsAuthDialogOpen(false);
@@ -76,25 +77,25 @@ const ManageUsersPage = () => {
       {/* Barre de navigation pour l'administrateur */}
       <NavBarAdmin />
       <div className="ml-72 p-8">
-        <h2 className="text-3xl font-bold mb-8 text-gray-800">Gérer les Utilisateurs</h2>
+        <h2 className="text-3xl font-bold mb-8 text-gray-800">Gérer les Newsletters</h2>
 
         {/* Tableau affichant les utilisateurs */}
         <TableContainer component={Paper}>
           <Table>
             <TableHead>
               <TableRow>
-                <TableCell>Nom d'utilisateur</TableCell>
+                
                 <TableCell>Email</TableCell>
-                <TableCell>Rôle</TableCell>
+                
                 <TableCell>Actions</TableCell>
               </TableRow>
             </TableHead>
             <TableBody>
               {users.map((user) => (
                 <TableRow key={user.id}>
-                  <TableCell>{user.username}</TableCell>
+                 
                   <TableCell>{user.email}</TableCell>
-                  <TableCell>{user.role}</TableCell>
+                  
                   <TableCell>
                     <IconButton onClick={() => handleDeleteClick(user)}>
                       <FaTrashAlt />
@@ -162,4 +163,4 @@ const ManageUsersPage = () => {
   );
 };
 
-export default ManageUsersPage;
+export default NewsletterAdmin;
